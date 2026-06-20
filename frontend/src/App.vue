@@ -43,14 +43,22 @@ onMounted(() => {
     <footer class="bg-slate-900 border-t border-slate-800 px-6 py-2 flex items-center gap-6 text-xs text-slate-400">
       <span>
         最大应力:
-        <span class="text-red-400 font-bold">
-          {{ store.result ? (store.maxStress / 1e6).toFixed(2) + ' MPa' : '—' }}
+        <span :class="store.resultStale ? 'text-amber-400' : 'text-red-400'" class="font-bold">
+          <template v-if="store.result">
+            {{ (store.maxStress / 1e6).toFixed(2) }} MPa
+            <span v-if="store.resultStale" class="text-[10px] ml-1">(失效)</span>
+          </template>
+          <template v-else>—</template>
         </span>
       </span>
       <span>
         最大位移:
-        <span class="text-amber-400 font-bold">
-          {{ store.result ? (store.maxDisplacement * 1000).toFixed(3) + ' mm' : '—' }}
+        <span :class="store.resultStale ? 'text-amber-400' : 'text-amber-400'" class="font-bold">
+          <template v-if="store.result">
+            {{ (store.maxDisplacement * 1000).toFixed(3) }} mm
+            <span v-if="store.resultStale" class="text-[10px] ml-1">(失效)</span>
+          </template>
+          <template v-else>—</template>
         </span>
       </span>
       <span>

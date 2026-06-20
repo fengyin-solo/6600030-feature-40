@@ -41,9 +41,14 @@ const store = useFEAStore();
     <!-- Solve button -->
     <button
       @click="store.solve()"
-      class="w-full py-2 rounded text-xs font-bold bg-green-700 text-white hover:bg-green-600 transition"
+      :class="[
+        'w-full py-2 rounded text-xs font-bold transition',
+        store.resultStale && store.result
+          ? 'bg-amber-600 text-white hover:bg-amber-500 animate-pulse'
+          : 'bg-green-700 text-white hover:bg-green-600'
+      ]"
     >
-      ⚙ 求解 FEA
+      {{ store.resultStale && store.result ? '🔄 重新求解 FEA' : '⚙ 求解 FEA' }}
     </button>
 
     <!-- Deformed mesh toggle -->
@@ -103,14 +108,22 @@ const store = useFEAStore();
       <div class="grid grid-cols-2 gap-2 text-xs">
         <div class="bg-slate-900 rounded p-2">
           <div class="text-slate-400">最大应力</div>
-          <div class="text-sm font-bold text-red-400">
-            {{ store.result ? (store.maxStress / 1e6).toFixed(2) + ' MPa' : '—' }}
+          <div :class="['text-sm font-bold', store.resultStale ? 'text-amber-400' : 'text-red-400']">
+            <template v-if="store.result">
+              {{ (store.maxStress / 1e6).toFixed(2) }} MPa
+              <span v-if="store.resultStale" class="text-[10px] block text-amber-500">(已失效)</span>
+            </template>
+            <template v-else>—</template>
           </div>
         </div>
         <div class="bg-slate-900 rounded p-2">
           <div class="text-slate-400">最大位移</div>
-          <div class="text-sm font-bold text-amber-400">
-            {{ store.result ? (store.maxDisplacement * 1000).toFixed(3) + ' mm' : '—' }}
+          <div :class="['text-sm font-bold', store.resultStale ? 'text-amber-400' : 'text-amber-400']">
+            <template v-if="store.result">
+              {{ (store.maxDisplacement * 1000).toFixed(3) }} mm
+              <span v-if="store.resultStale" class="text-[10px] block text-amber-500">(已失效)</span>
+            </template>
+            <template v-else>—</template>
           </div>
         </div>
         <div class="bg-slate-900 rounded p-2">

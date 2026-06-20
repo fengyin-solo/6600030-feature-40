@@ -12,6 +12,7 @@ import {
 export const useFEAStore = defineStore('fea', () => {
   const model = ref<FEAModel>({ nodes: [], elements: [], loads: [] });
   const result = ref<FEAResult | null>(null);
+  const resultStale = ref(false);
   const selectedPreset = ref<string>('cantilever');
   const showDeformed = ref(false);
   const deformationScale = ref(10);
@@ -21,7 +22,7 @@ export const useFEAStore = defineStore('fea', () => {
   // ─── Actions ──────────────────────────────────────────────────────────────
   function loadPreset(name: string) {
     selectedPreset.value = name;
-    result.value = null;
+    resultStale.value = true;
     selectedElement.value = null;
     switch (name) {
       case 'cantilever':
@@ -40,6 +41,7 @@ export const useFEAStore = defineStore('fea', () => {
 
   function solve() {
     result.value = feaSolve(model.value);
+    resultStale.value = false;
   }
 
   function toggleDeformed() {
@@ -56,11 +58,15 @@ export const useFEAStore = defineStore('fea', () => {
 
   function addLoad(nodeId: number, fx: number, fy: number) {
     model.value.loads.push({ nodeId, fx, fy });
+    resultStale.value = true;
   }
 
   function toggleFixed(nodeId: number) {
     const node = model.value.nodes.find((n) => n.id === nodeId);
-    if (node) node.fixed = !node.fixed;
+    if (node) {
+      node.fixed = !node.fixed;
+      resultStale.value = true;
+    }
   }
 
   // ─── Computed ─────────────────────────────────────────────────────────────
@@ -76,7 +82,7 @@ export const useFEAStore = defineStore('fea', () => {
 
   const elementColors = computed(() => {
     const colors = new Map<number, string>();
-    if (!result.value || model.value.elements.length === 0) {
+    if (!result.value || resultStale.value || model.value.elements.length === 0) {
       for (const el of model.value.elements) {
         colors.set(el.id, '#6b7280');
       }
@@ -113,6 +119,7 @@ export const useFEAStore = defineStore('fea', () => {
   return {
     model,
     result,
+    resultStale,
     selectedPreset,
     showDeformed,
     deformationScale,

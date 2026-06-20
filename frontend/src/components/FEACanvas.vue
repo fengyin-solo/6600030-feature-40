@@ -350,16 +350,32 @@ watch(
 </script>
 
 <template>
-  <canvas
-    ref="canvas"
-    width="800"
-    height="500"
-    class="w-full rounded-lg border border-slate-700 cursor-crosshair"
-    @mousedown="handleMouseDown"
-    @mousemove="handleMouseMove"
-    @mouseup="handleMouseUp"
-    @mouseleave="handleMouseUp"
-    @wheel="handleWheel"
-    @click="handleClick"
-  />
+  <div class="relative">
+    <canvas
+      ref="canvas"
+      width="800"
+      height="500"
+      class="w-full rounded-lg border border-slate-700 cursor-crosshair"
+      :class="{ 'opacity-60': store.resultStale && store.result }"
+      @mousedown="handleMouseDown"
+      @mousemove="handleMouseMove"
+      @mouseup="handleMouseUp"
+      @mouseleave="handleMouseUp"
+      @wheel="handleWheel"
+      @click="handleClick"
+    />
+    <div
+      v-if="store.resultStale && store.result"
+      class="absolute inset-0 flex items-center justify-center pointer-events-none"
+    >
+      <div class="bg-amber-500/20 border border-amber-500/60 rounded-lg px-6 py-4 backdrop-blur-sm">
+        <div class="text-amber-300 font-bold text-sm mb-1">
+          ⚠️ 模型已变更，结果已失效
+        </div>
+        <div class="text-amber-200/80 text-xs">
+          点击「求解 FEA」重新计算
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
